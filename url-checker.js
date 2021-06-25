@@ -41,7 +41,7 @@ class UrlObj {
     }
 }
 
-function getFlattenedData(data) {
+function getData(data) {
     // [UrlObj, UrlObj]
     return data.data.documents.map(doc => new UrlObj(doc.url, data.id, doc.name));
 }
@@ -66,9 +66,14 @@ async function getAllInvalidUrlObjs(flattened) {
 }
 
 async function urlChecker(ldifContent) {
-    const flattened = ldifContent.content.flatMap(getFlattenedData)
+    const flattened = ldifContent.content.flatMap(getData)
     console.log('Total URLs to check', flattened.length)
-    const checkedInvalidUrls = await getAllInvalidUrlObjs(flattened);
+
+    const checkedInvalidUrls = (await Promise.all([
+        getAllInvalidUrlObjs(flattened.slice(0, flattened.length / 2)),
+        getAllInvalidUrlObjs(flattened.slice(flattened.length / 2)),
+    ])).flatMap(x => x)
+
     console.log('invalid urls ', checkedInvalidUrls.length)
 
     try{
