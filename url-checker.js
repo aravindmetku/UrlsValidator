@@ -48,10 +48,14 @@ function getData(data) {
 
 async function getAllInvalidUrlObjs(flattened) {
     const final = []
-    const alreadySeen = new Set()
+    const alreadySeen = new Map()
     for (let i = 0; i < flattened.length; i++) {
         const urlObj = flattened[i]
         if (alreadySeen.has(urlObj.url)) {
+            const cachedCheck = alreadySeen.get(urlObj.url)
+            if(!cachedCheck) {
+                final.push(urlObj)
+            }
             continue
         }
         await timeout(10000)
@@ -60,7 +64,7 @@ async function getAllInvalidUrlObjs(flattened) {
         if (!check) {
             final.push(urlObj)
         }
-        alreadySeen.add(urlObj.url)
+        alreadySeen.set(urlObj.url, check)
     }
     return final;
 }
